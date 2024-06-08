@@ -1,10 +1,12 @@
 import requests
 
-# Replace with your access token and video ID
+# Replace 'YOUR_ACCESS_TOKEN' with your actual access token
 access_token = 'EAAWJ3kgZBI88BO1GJuaTomLY5j9SwjW2VgVRGxZCq9tN7o6wdZAyapRwZAlBJAocIN4SZB4Ed0gCwZBXyj4bmsVvYoWVDN0hV2Elf3gleIvdZCiKdfC9hlxNka27aaQe197fhZAhqcr61Yxjbhn0XyZAjgjKS6dFPVBZAXjPceLo8ZBOFkSWUZAdMqpXZBHc0a6xOLJV4MFHW6hX7yMH6sOWOww1y9kQNCAwZD'
-video_id = '1103359090738517'
 
-url = f'https://graph.facebook.com/v12.0/{video_id}/reactions'
+# Replace 'POST_ID' with the ID of the Facebook post you want to retrieve reactions from
+post_id = '435225199274433'
+
+url = f'https://graph.facebook.com/v12.0/{post_id}/reactions'
 params = {
     'access_token': access_token,
     'limit': 100  # Adjust limit as needed
