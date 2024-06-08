@@ -29,19 +29,9 @@ if response.status_code == 200:
             user_name = comment['from'].get('name', 'No name available')
             print(f'User ID: {user_id}, Name: {user_name}')
     else:
-        print("No 'data' key found in the response.")
-        print(data)
+        print("No comments found.")
 else:
     # Print the error details
     print(f"Failed to retrieve data. Status code: {response.status_code}")
     error_response = response.json()
     print(error_response)
-    # Additional error handling based on error type and code
-    error_message = error_response.get('error', {}).get('message', '')
-    error_type = error_response.get('error', {}).get('type', '')
-    error_code = error_response.get('error', {}).get('code', '')
-    error_subcode = error_response.get('error', {}).get('error_subcode', '')
-    print(f"Error Message: {error_message}")
-    print(f"Error Type: {error_type}")
-    print(f"Error Code: {error_code}")
-    print(f"Error Subcode: {error_subcode}")
