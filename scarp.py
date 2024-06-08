@@ -11,10 +11,19 @@ params = {
 }
 
 response = requests.get(url, params=params)
-data = response.json()
 
-# Print out user IDs and names
-for reaction in data['data']:
-    user_id = reaction['id']
-    user_name = reaction.get('name', 'No name available')
-    print(f'User ID: {user_id}, Name: {user_name}')
+# Check the status code and the content of the response
+if response.status_code == 200:
+    data = response.json()
+    if 'data' in data:
+        # Print out user IDs and names
+        for reaction in data['data']:
+            user_id = reaction['id']
+            user_name = reaction.get('name', 'No name available')
+            print(f'User ID: {user_id}, Name: {user_name}')
+    else:
+        print("No 'data' key found in the response.")
+        print(data)
+else:
+    print(f"Failed to retrieve data. Status code: {response.status_code}")
+    print(response.json())
