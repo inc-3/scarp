@@ -1,15 +1,16 @@
-import os
 import requests
 
-# Retrieve access token from environment variable
-access_token = os.getenv('EAAWJ3kgZBI88BOwWs0PMd5av5GgcAuZBuEOA92zKpnSQhrm0Iitd3MCk6R5VxfwkhNywxrA9CHsd1L0RE5jQTQ7L4onNtFj8oU8RyxZBAp7ZAXGz9FW7mGbZCXPF76yNTQSZADVqkYSZBbudCW3gnWyZAwSX5VgmyK9Wdesqbwz5yygsEi4XmI4WleCvFHvfUid3ZAqu5dRDIY4Sk4QPcRwZDZD')
+def get_user_input(prompt):
+    """
+    Helper function to get user input with a prompt.
+    """
+    return input(prompt).strip()
 
-if access_token is None:
-    print("Error: Access token not found. Please set the 'FACEBOOK_ACCESS_TOKEN' environment variable.")
-    exit()
+# Get access token from user input
+access_token = get_user_input("Enter your Facebook access token: ")
 
 # Replace 'POST_ID' with the ID of the Facebook post you want to retrieve comments from
-post_id = '435225199274433'
+post_id = get_user_input("Enter the ID of the Facebook post: ")
 
 url = f'https://graph.facebook.com/v12.0/{post_id}/comments'
 params = {
