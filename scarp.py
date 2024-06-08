@@ -1,6 +1,5 @@
 import os, sys, time, requests, re, json, random, base64, uuid
 from concurrent.futures import ThreadPoolExecutor
-from Color import bold_putih, bold_cyan, bold_merah
 from Utils import clear, HeadersGetWindows, HeadersPostWindows, HeadersGetAndroid, GetTime, ConvertURL, ConvertID, GetData, GetDataNoLogin, GetTokenEAAB, GetTokenEAAG
 
 #--> Baca Cookie
