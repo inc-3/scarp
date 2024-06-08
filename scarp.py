@@ -1,12 +1,17 @@
+import os
 import requests
 
-# Replace 'YOUR_ACCESS_TOKEN' with your actual access token
-access_token = 'EAAWJ3kgZBI88BO1GJuaTomLY5j9SwjW2VgVRGxZCq9tN7o6wdZAyapRwZAlBJAocIN4SZB4Ed0gCwZBXyj4bmsVvYoWVDN0hV2Elf3gleIvdZCiKdfC9hlxNka27aaQe197fhZAhqcr61Yxjbhn0XyZAjgjKS6dFPVBZAXjPceLo8ZBOFkSWUZAdMqpXZBHc0a6xOLJV4MFHW6hX7yMH6sOWOww1y9kQNCAwZD'
+# Retrieve access token from environment variable
+access_token = os.getenv('EAAWJ3kgZBI88BOwWs0PMd5av5GgcAuZBuEOA92zKpnSQhrm0Iitd3MCk6R5VxfwkhNywxrA9CHsd1L0RE5jQTQ7L4onNtFj8oU8RyxZBAp7ZAXGz9FW7mGbZCXPF76yNTQSZADVqkYSZBbudCW3gnWyZAwSX5VgmyK9Wdesqbwz5yygsEi4XmI4WleCvFHvfUid3ZAqu5dRDIY4Sk4QPcRwZDZD')
 
-# Replace 'POST_ID' with the ID of the Facebook post you want to retrieve reactions from
+if access_token is None:
+    print("Error: Access token not found. Please set the 'FACEBOOK_ACCESS_TOKEN' environment variable.")
+    exit()
+
+# Replace 'POST_ID' with the ID of the Facebook post you want to retrieve comments from
 post_id = '435225199274433'
 
-url = f'https://graph.facebook.com/v12.0/{post_id}/reactions'
+url = f'https://graph.facebook.com/v12.0/{post_id}/comments'
 params = {
     'access_token': access_token,
     'limit': 100  # Adjust limit as needed
@@ -18,9 +23,9 @@ if response.status_code == 200:
     data = response.json()
     if 'data' in data:
         # Print out user IDs and names
-        for reaction in data['data']:
-            user_id = reaction['id']
-            user_name = reaction.get('name', 'No name available')
+        for comment in data['data']:
+            user_id = comment['from']['id']
+            user_name = comment['from'].get('name', 'No name available')
             print(f'User ID: {user_id}, Name: {user_name}')
     else:
         print("No 'data' key found in the response.")
