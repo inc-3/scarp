@@ -9,10 +9,13 @@ def get_user_input(prompt):
 # Get access token from user input
 access_token = get_user_input("Enter your Facebook access token: ")
 
+# Replace 'USER_ID' with the ID of the Facebook user who posted the post
+user_id = get_user_input("Enter the ID of the Facebook user who posted the post: ")
+
 # Replace 'POST_ID' with the ID of the Facebook post you want to retrieve comments from
 post_id = get_user_input("Enter the ID of the Facebook post: ")
 
-url = f'https://graph.facebook.com/v12.0/{post_id}/comments'
+url = f'https://graph.facebook.com/v12.0/{user_id}_{post_id}/comments'
 params = {
     'access_token': access_token,
     'limit': 100  # Adjust limit as needed
