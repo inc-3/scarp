@@ -43,16 +43,18 @@ class Dump:
 
     def dump_post_likes(self, post_id):
         url = f"https://mbasic.facebook.com/ufi/reaction/profile/browser/?ft_ent_identifier={post_id}"
-        self.scrape(url)
+        return self.scrape(url)
 
     def scrape(self, url):
         session = requests.Session()
         response = session.get(url, cookies={'cookie': self.token})
         soup = parser(response.text, 'html.parser')
+        uids = []
         for user in soup.find_all('a', href=True):
             user_id = re.search(r'id=(\d+)', user['href'])
             if user_id:
-                print(f"Found UID: {user_id.group(1)}")
+                uids.append(user_id.group(1))
+        return uids
 
     def save_cookies(self, cookies):
         with open('cookies.txt', 'w') as file:
@@ -61,22 +63,24 @@ class Dump:
 class Menu:
     def __init__(self, dump):
         self.dump = dump
-        self.show_menu()
+        self.run_menu()
 
-    def show_menu(self):
-        self.clear_screen()
-        print("Select an option:")
-        print("1. Dump Post Likes")
-        choice = input("Enter your choice: ")
-        self.handle_choice(choice)
-
-    def handle_choice(self, choice):
-        if choice == '1':
-            post_id = input("Enter post ID: ")
-            self.dump.dump_post_likes(post_id)
-        else:
-            print("Invalid choice. Try again.")
-            self.show_menu()
+    def run_menu(self):
+        while True:
+            self.clear_screen()
+            print("Select an option:")
+            print("1. Dump Post Likes")
+            print("2. Exit")
+            choice = input("Enter your choice: ")
+            if choice == '1':
+                post_id = input("Enter post ID: ")
+                uids = self.dump.dump_post_likes(post_id)
+                print("Found UIDs:", uids)
+                input("Press Enter to continue...")
+            elif choice == '2':
+                break
+            else:
+                print("Invalid choice. Try again.")
 
     def clear_screen(self):
         os.system('cls' if os.name == 'nt' else 'clear')
