@@ -41,22 +41,6 @@ class Dump:
     def __init__(self, token):
         self.token = token
 
-    def dump_friends(self, target_id):
-        url = f"https://mbasic.facebook.com/{target_id}/friends"
-        self.scrape(url)
-
-    def dump_followers(self, target_id):
-        url = f"https://mbasic.facebook.com/{target_id}/subscribers"
-        self.scrape(url)
-
-    def dump_group_members(self, group_id):
-        url = f"https://mbasic.facebook.com/groups/{group_id}/members"
-        self.scrape(url)
-
-    def dump_search(self, query):
-        url = f"https://mbasic.facebook.com/search/people/?q={query}"
-        self.scrape(url)
-
     def dump_post_likes(self, post_id):
         url = f"https://mbasic.facebook.com/ufi/reaction/profile/browser/?ft_ent_identifier={post_id}"
         self.scrape(url)
@@ -77,28 +61,12 @@ class Menu:
 
     def show_menu(self):
         print("Select an option:")
-        print("1. Dump Friend List")
-        print("2. Dump Followers")
-        print("3. Dump Group Members")
-        print("4. Search by Name")
-        print("5. Dump Post Likes")
+        print("1. Dump Post Likes")
         choice = input("Enter your choice: ")
         self.handle_choice(choice)
 
     def handle_choice(self, choice):
         if choice == '1':
-            target_id = input("Enter target user ID or username: ")
-            self.dump.dump_friends(target_id)
-        elif choice == '2':
-            target_id = input("Enter target user ID or username: ")
-            self.dump.dump_followers(target_id)
-        elif choice == '3':
-            group_id = input("Enter group ID: ")
-            self.dump.dump_group_members(group_id)
-        elif choice == '4':
-            query = input("Enter name to search: ")
-            self.dump.dump_search(query)
-        elif choice == '5':
             post_id = input("Enter post ID: ")
             self.dump.dump_post_likes(post_id)
         else:
