@@ -44,10 +44,6 @@ class Dump:
         url = f"https://mbasic.facebook.com/ufi/reaction/profile/browser/?ft_ent_identifier={post_id}"
         return self.scrape(url)
 
-    def dump_video_reactions(self, video_id):
-        url = f"https://m.facebook.com/browse/reactions/?id={video_id}"
-        return self.scrape(url)
-
     def scrape(self, url):
         session = requests.Session()
         response = session.get(url, cookies={'cookie': self.token})
@@ -58,7 +54,7 @@ class Dump:
             if uid_match:
                 uid = uid_match.group(1)
                 name = user.get_text()
-                users.append((uid, name))
+                users.append(f"{uid}|{name}")
             if len(users) >= 100:
                 break
         return users
@@ -77,24 +73,16 @@ class Menu:
             self.clear_screen()
             print("Select an option:")
             print("1. Dump Post Likes")
-            print("2. Dump Video Reactions")
-            print("3. Exit")
+            print("2. Exit")
             choice = input("Enter your choice: ")
             if choice == '1':
                 post_id = input("Enter post ID: ")
                 users = self.dump.dump_post_likes(post_id)
                 print("Found Users:")
-                for uid, name in users:
-                    print(f"UID: {uid}, Name: {name}")
+                for user in users:
+                    print(user)
                 input("Press Enter to continue...")
             elif choice == '2':
-                video_id = input("Enter video ID: ")
-                users = self.dump.dump_video_reactions(video_id)
-                print("Found Users:")
-                for uid, name in users:
-                    print(f"UID: {uid}, Name: {name}")
-                input("Press Enter to continue...")
-            elif choice == '3':
                 break
             else:
                 print("Invalid choice. Try again.")
