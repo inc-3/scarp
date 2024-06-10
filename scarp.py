@@ -1,96 +1,71 @@
-import os
 import requests
-import re
-from bs4 import BeautifulSoup as parser
+from bs4 import BeautifulSoup
+import json
 
-class Login:
-    def __init__(self):
-        self.token = ""
-        self.cookies = self.load_cookies()
-        if self.cookies:
-            self.validate_cookies()
-        else:
-            self.get_new_cookies()
-
-    def load_cookies(self):
-        try:
-            with open('cookies.txt', 'r') as file:
-                cookies = file.read().strip()
-            return cookies
-        except FileNotFoundError:
-            return None
-
-    def save_cookies(self, cookies):
-        with open('cookies.txt', 'w') as file:
-            file.write(cookies)
-
-    def validate_cookies(self):
-        response = requests.get('https://mbasic.facebook.com/profile.php', cookies={'cookie': self.cookies})
-        if 'mbasic_logout_button' in response.text:
-            self.token = self.cookies
-        else:
-            self.get_new_cookies()
-
-    def get_new_cookies(self):
-        self.cookies = input("Enter your Facebook cookies: ")
-        self.save_cookies(self.cookies)
-        self.validate_cookies()
-
-class Dump:
-    def __init__(self, token):
-        self.token = token
-
-    def dump_post_likes(self, post_id):
-        url = f"https://mbasic.facebook.com/ufi/reaction/profile/browser/?ft_ent_identifier={post_id}"
-        return self.scrape(url)
-
-    def scrape(self, url):
+def PostReactionsDump(post_url, reaction_type, result_list, session=None, cursor=None):
+    # Initialize session if not provided
+    if session is None:
         session = requests.Session()
-        response = session.get(url, cookies={'cookie': self.token})
-        soup = parser(response.text, 'html.parser')
-        users = []
-        for user in soup.find_all('a', href=True):
-            uid_match = re.search(r'id=(\d+)', user['href'])
-            if uid_match:
-                uid = uid_match.group(1)
-                name = user.get_text()
-                users.append(f"{uid}|{name}")
-            if len(users) >= 100:
-                break
-        return users
-
-    def save_cookies(self, cookies):
-        with open('cookies.txt', 'w') as file:
-            file.write(cookies)
-
-class Menu:
-    def __init__(self, dump):
-        self.dump = dump
-        self.run_menu()
-
-    def run_menu(self):
-        while True:
-            self.clear_screen()
-            print("Select an option:")
-            print("1. Dump Post Likes")
-            print("2. Exit")
-            choice = input("Enter your choice: ")
-            if choice == '1':
-                post_id = input("Enter post ID: ")
-                users = self.dump.dump_post_likes(post_id)
-                print("Found Users:")
-                for user in users:
-                    print(user)
-                input("Press Enter to continue...")
-            elif choice == '2':
-                break
-            else:
-                print("Invalid choice. Try again.")
-
-    def clear_screen(self):
-        os.system('cls' if os.name == 'nt' else 'clear')
+    
+    # Make request to the Facebook post URL
+    response = session.get(post_url)
+    
+    # Parse HTML content
+    soup = BeautifulSoup(response.content, 'html.parser')
+    
+    # Extract necessary data for GraphQL request
+    post_id = soup.find('meta', property='al:ios:url')['content'].split(':')[-1].split('?')[0]
+    fb_dtsg = soup.find('input', {'name': 'fb_dtsg'})['value']
+    
+    # Prepare data for GraphQL request
+    data = {
+        'doc_id': '481719952165683',
+        'fb_dtsg': fb_dtsg,
+        'variables': json.dumps({
+            'data': {
+                'feedback_id': post_id,
+                'first': 50,  # Number of reactions to fetch per request
+                'after': cursor,
+                'include_subsequent': False,
+                'display_comments_context_enable_comment': False,
+                'display_comments_context_is_ad_preview': False,
+                'display_comments_context_is_aggregated_share': False,
+                'display_comments_feedback_context': None,
+                'feed_location': 'permalink',
+                'feedback_source': 22,
+                'scale': 1.5,
+                'use_default_actor': False,
+                'top_level_render_location': 'permalink',
+                'stream_initial_count': 0
+            }
+        })
+    }
+    
+    # Send GraphQL API request to fetch reactions
+    api_response = session.post('https://www.facebook.com/api/graphql/', data=data)
+    api_data = api_response.json()
+    
+    # Parse response and extract user IDs
+    try:
+        reactions = api_data['data']['feedback']['reactors']['nodes']
+        for reaction in reactions:
+            user_id = reaction['id']
+            result_list.append(user_id)
+    except KeyError:
+        print("Failed to extract reactions data.")
+        return
+    
+    # Check for pagination
+    has_next_page = api_data['data']['feedback']['reactors']['page_info']['has_next_page']
+    if has_next_page:
+        cursor = api_data['data']['feedback']['reactors']['page_info']['end_cursor']
+        PostReactionsDump(post_url, reaction_type, result_list, session=session, cursor=cursor)
 
 if __name__ == "__main__":
-    login = Login()
-    dump = Dump(login.token)
-    menu = Menu(dump)
+    # Accept user inputs for post URL and reaction type
+    post_url = input("Enter the URL of the Facebook post: ")
+    reaction_type = input("Enter the reaction type (e.g., 'LIKE', 'LOVE', 'HAHA', etc.): ").upper()
+
+    result_list = []
+    PostReactionsDump(post_url, reaction_type, result_list)
+    print("Dumped User IDs:", result_list)
