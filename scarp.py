@@ -64,6 +64,7 @@ class Menu:
         self.show_menu()
 
     def show_menu(self):
+        self.clear_screen()
         print("Select an option:")
         print("1. Dump Post Likes")
         choice = input("Enter your choice: ")
@@ -76,6 +77,9 @@ class Menu:
         else:
             print("Invalid choice. Try again.")
             self.show_menu()
+
+    def clear_screen(self):
+        os.system('cls' if os.name == 'nt' else 'clear')
 
 if __name__ == "__main__":
     login = Login()
