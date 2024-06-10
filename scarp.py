@@ -14,8 +14,18 @@ def PostReactionsDump(post_url, reaction_type, result_list, session=None, cursor
     soup = BeautifulSoup(response.content, 'html.parser')
     
     # Extract necessary data for GraphQL request
-    post_id = soup.find('meta', property='al:ios:url')['content'].split(':')[-1].split('?')[0]
-    fb_dtsg = soup.find('input', {'name': 'fb_dtsg'})['value']
+    meta_tag = soup.find('meta', property='al:ios:url')
+    if meta_tag is None:
+        print("Error: Could not find meta tag with property 'al:ios:url'.")
+        return
+    
+    post_id = meta_tag['content'].split(':')[-1].split('?')[0]
+    fb_dtsg_input = soup.find('input', {'name': 'fb_dtsg'})
+    if fb_dtsg_input is None:
+        print("Error: Could not find input tag with name 'fb_dtsg'.")
+        return
+    
+    fb_dtsg = fb_dtsg_input['value']
     
     # Prepare data for GraphQL request
     data = {
