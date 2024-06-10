@@ -54,6 +54,10 @@ class Dump:
             if user_id:
                 print(f"Found UID: {user_id.group(1)}")
 
+    def save_cookies(self, cookies):
+        with open('cookies.txt', 'w') as file:
+            file.write(cookies)
+
 class Menu:
     def __init__(self, dump):
         self.dump = dump
