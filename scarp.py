@@ -59,10 +59,6 @@ class Dump:
                 break
         return users
 
-    def save_cookies(self, cookies):
-        with open('cookies.txt', 'w') as file:
-            file.write(cookies)
-
 class Menu:
     def __init__(self, dump):
         self.dump = dump
