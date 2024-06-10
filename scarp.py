@@ -354,6 +354,7 @@ class Dump():
         except KeyboardInterrupt: self.loop=0; pass
         except Exception as e: pass
 
+class Dump():
 def PostReactions(self, post_url, result):
     r = requests.Session()
     req = r.get(post_url, headers=HeadersGet(), cookies={'cookie': self.cookie}, allow_redirects=True).content
