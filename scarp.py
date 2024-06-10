@@ -46,17 +46,23 @@ class Dump:
 
     def scrape(self, url):
         session = requests.Session()
-        response = session.get(url, cookies={'cookie': self.token})
-        soup = parser(response.text, 'html.parser')
         users = []
-        for user in soup.find_all('a', href=True):
-            uid_match = re.search(r'id=(\d+)', user['href'])
-            if uid_match:
-                uid = uid_match.group(1)
-                name = user.get_text()
-                users.append(f"{uid}|{name}")
-            if len(users) >= 100:
-                break
+        while url:
+            response = session.get(url, cookies={'cookie': self.token})
+            soup = parser(response.text, 'html.parser')
+            for user in soup.find_all('a', href=True):
+                uid_match = re.search(r'id=(\d+)', user['href'])
+                if uid_match:
+                    uid = uid_match.group(1)
+                    name = user.get_text()
+                    users.append((uid, name))
+                    if len(users) >= 100:
+                        return users
+            next_link = soup.find('a', string='See More')
+            if next_link:
+                url = next_link['href']
+            else:
+                url = None
         return users
 
     def save_cookies(self, cookies):
@@ -79,8 +85,8 @@ class Menu:
                 post_id = input("Enter post ID: ")
                 users = self.dump.dump_post_likes(post_id)
                 print("Found Users:")
-                for user in users:
-                    print(user)
+                for uid, name in users:
+                    print(f"UID: {uid}, Name: {name}")
                 input("Press Enter to continue...")
             elif choice == '2':
                 break
