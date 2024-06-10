@@ -54,7 +54,7 @@ class Dump:
             if uid_match:
                 uid = uid_match.group(1)
                 name = user.get_text()
-                users.append((uid, name))
+                users.append(f"{uid}|{name}")
             if len(users) >= 100:
                 break
         return users
@@ -79,8 +79,8 @@ class Menu:
                 post_id = input("Enter post ID: ")
                 users = self.dump.dump_post_likes(post_id)
                 print("Found Users:")
-                for uid, name in users:
-                    print(f"UID: {uid}, Name: {name}")
+                for user in users:
+                    print(user)
                 input("Press Enter to continue...")
             elif choice == '2':
                 break
