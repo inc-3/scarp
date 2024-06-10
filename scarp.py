@@ -1,35 +1,30 @@
-import requests
-from bs4 import BeautifulSoup
-import json
-import re
+from requests_html import HTMLSession
 
 def PostReactionsDump(post_url, reaction_type, result_list, session=None, cursor=None):
     # Initialize session if not provided
     if session is None:
-        session = requests.Session()
-    
+        session = HTMLSession()
+
+    # Fetch the fully rendered HTML content
+    response = session.get(post_url)
+    response.html.render()
+
     # Extract post ID from the URL
     post_id_match = re.search(r'\/posts\/(\d+)', post_url)
     if post_id_match is None:
         print("Error: Invalid Facebook post URL.")
         return
-    
+
     post_id = post_id_match.group(1)
-    
-    # Make request to the Facebook post URL
-    response = session.get(post_url)
-    
-    # Parse HTML content
-    soup = BeautifulSoup(response.content, 'html.parser')
-    
-    # Extract necessary data for GraphQL request
-    fb_dtsg_input = soup.find('input', {'name': 'fb_dtsg'})
+
+    # Extract fb_dtsg value
+    fb_dtsg_input = response.html.find('input[name="fb_dtsg"]', first=True)
     if fb_dtsg_input is None:
         print("Error: Could not find input tag with name 'fb_dtsg'.")
         return
-    
-    fb_dtsg = fb_dtsg_input['value']
-    
+
+    fb_dtsg = fb_dtsg_input.attrs['value']
+
     # Prepare data for GraphQL request
     data = {
         'doc_id': '481719952165683',
@@ -53,11 +48,11 @@ def PostReactionsDump(post_url, reaction_type, result_list, session=None, cursor
             }
         })
     }
-    
+
     # Send GraphQL API request to fetch reactions
     api_response = session.post('https://www.facebook.com/api/graphql/', data=data)
     api_data = api_response.json()
-    
+
     # Parse response and extract user IDs
     try:
         reactions = api_data['data']['feedback']['reactors']['nodes']
@@ -67,7 +62,7 @@ def PostReactionsDump(post_url, reaction_type, result_list, session=None, cursor
     except KeyError:
         print("Failed to extract reactions data.")
         return
-    
+
     # Check for pagination
     has_next_page = api_data['data']['feedback']['reactors']['page_info']['has_next_page']
     if has_next_page:
