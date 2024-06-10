@@ -2,6 +2,7 @@ import os
 import requests
 import re
 from bs4 import BeautifulSoup as parser
+from concurrent.futures import ThreadPoolExecutor
 
 class Login:
     def __init__(self):
@@ -42,20 +43,16 @@ class Dump:
 
     def dump_post_likes(self, post_id):
         url = f"https://mbasic.facebook.com/ufi/reaction/profile/browser/?ft_ent_identifier={post_id}"
-        return self.scrape(url)
+        self.scrape(url)
 
     def scrape(self, url):
         session = requests.Session()
         response = session.get(url, cookies={'cookie': self.token})
         soup = parser(response.text, 'html.parser')
-        uids = []
         for user in soup.find_all('a', href=True):
             user_id = re.search(r'id=(\d+)', user['href'])
             if user_id:
-                uids.append(user_id.group(1))
-            if len(uids) >= 100:
-                break
-        return uids
+                print(f"Found UID: {user_id.group(1)}")
 
     def save_cookies(self, cookies):
         with open('cookies.txt', 'w') as file:
@@ -64,24 +61,22 @@ class Dump:
 class Menu:
     def __init__(self, dump):
         self.dump = dump
-        self.run_menu()
+        self.show_menu()
 
-    def run_menu(self):
-        while True:
-            self.clear_screen()
-            print("Select an option:")
-            print("1. Dump Post Likes")
-            print("2. Exit")
-            choice = input("Enter your choice: ")
-            if choice == '1':
-                post_id = input("Enter post ID: ")
-                uids = self.dump.dump_post_likes(post_id)
-                print("Found UIDs:", uids)
-                input("Press Enter to continue...")
-            elif choice == '2':
-                break
-            else:
-                print("Invalid choice. Try again.")
+    def show_menu(self):
+        self.clear_screen()
+        print("Select an option:")
+        print("1. Dump Post Likes")
+        choice = input("Enter your choice: ")
+        self.handle_choice(choice)
+
+    def handle_choice(self, choice):
+        if choice == '1':
+            post_id = input("Enter post ID: ")
+            self.dump.dump_post_likes(post_id)
+        else:
+            print("Invalid choice. Try again.")
+            self.show_menu()
 
     def clear_screen(self):
         os.system('cls' if os.name == 'nt' else 'clear')
