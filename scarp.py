@@ -354,10 +354,17 @@ class Dump():
         except KeyboardInterrupt: self.loop=0; pass
         except Exception as e: pass
 
-    def PostReactions(self, post_url, result):
-        r = requests.Session()
-        req = r.get(post_url, headers=HeadersGet(), cookies={'cookie': self.cookie}, allow_redirects=True).content
-        post_id = re.search('"fb://(\d+)"', str(req)).group(1)
+def PostReactions(self, post_url, result):
+    r = requests.Session()
+    req = r.get(post_url, headers=HeadersGet(), cookies={'cookie': self.cookie}, allow_redirects=True).content
+    
+    # Perform the regular expression search
+    post_id_match = re.search('"fb://(\d+)"', str(req))
+    
+    # Check if a match was found
+    if post_id_match:
+        # Access the group if a match was found
+        post_id = post_id_match.group(1)
         
         # Construct the GraphQL query to fetch post reactions
         query = '''
@@ -384,6 +391,8 @@ class Dump():
         
         print('\rSedang Dump %s ID' % str(len(result)), end='')
         sys.stdout.flush()
+    else:
+        print("No post ID found in the response.")
 
 #--> Trigger
 if __name__ == '__main__':
