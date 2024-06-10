@@ -1,147 +1,34 @@
-# Python 3.10
-# Made With Mobile, Web, And GraphQL Facebook
+import requests
+import json
+import re
+import sys
 
-#--> Author's Info
-Author    = 'Dapunta Khurayra X'
-Facebook  = 'Facebook.com/Dapunta.Khurayra.X'
-Instagram = 'Instagram.com/Dapunta.Ratya'
-Whatsapp  = 'Wa.me/6282245780524'
-YouTube   = 'Youtube.com/channel/UCZqnZlJ0jfoWSnXrNEj5JHA'
+#--> Input Cookies Function
+def input_cookies():
+    return input('Input Cookies: ')
 
-#--> Import Default Module & Library
-import os, sys, random, json, re, concurrent, time, shutil
-from concurrent.futures import ThreadPoolExecutor
-from random import choice as rc
-from random import randrange as rr
+#--> Input Post ID Function
+def input_post_id():
+    return input('Input Post ID: ')
 
-#--> Clear Terminal
-def clear():
-    if 'linux' in sys.platform.lower():os.system('clear')
-    elif 'win' in sys.platform.lower():os.system('cls')
-
-#--> Import Extra Module & Library
-def mod():
-    global requests, bs4, bs
-    clear()
-    try: import requests
-    except Exception as e: os.system('pip install requests'); import requests
-    try: import bs4
-    except Exception as e: os.system('pip install bs4'); import bs4
-    from bs4 import BeautifulSoup as bs
-    try: os.mkdir('login')
-    except Exception as e: pass
-    clear()
-
-#--> Global Variable
-DefaultUAWindows = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36'
-RandomUAWindows  = lambda : 'Mozilla/5.0 (Windows NT %s.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s.%s.%s.%s Safari/537.36'%(rc(['10','11']),rr(110,201),rr(0,10),rr(0,10),rr(0,10))
-HeadersGet  = lambda i=DefaultUAWindows : {'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7','Accept-Encoding':'gzip, deflate','Accept-Language':'en-US,en;q=0.9','Cache-Control':'max-age=0','Dpr':'1','Pragma':'akamai-x-cache-on, akamai-x-cache-remote-on, akamai-x-check-cacheable, akamai-x-get-cache-key, akamai-x-get-extracted-values, akamai-x-get-ssl-client-session-id, akamai-x-get-true-cache-key, akamai-x-serial-no, akamai-x-get-request-id,akamai-x-get-nonces,akamai-x-get-client-ip,akamai-x-feo-trace','Sec-Ch-Prefers-Color-Scheme':'dark','Sec-Ch-Ua':'','Sec-Ch-Ua-Full-Version-List':'','Sec-Ch-Ua-Mobile':'?0','Sec-Ch-Ua-Model':'','Sec-Ch-Ua-Platform':'','Sec-Ch-Ua-Platform-Version':'','Sec-Fetch-Dest':'document','Sec-Fetch-Mode':'navigate','Sec-Fetch-Site':'none','Sec-Fetch-User':'?1','Upgrade-Insecure-Requests':'1','User-Agent':i}
-HeadersPost = lambda i=DefaultUAWindows : {'Accept':'*/*','Accept-Encoding':'gzip, deflate','Accept-Language':'en-US,en;q=0.9','Content-Length':'1545','Content-Type':'application/x-www-form-urlencoded','Dpr':'1','Origin':'https://www.facebook.com','Referer':'https://www.facebook.com','Sec-Ch-Prefers-Color-Scheme':'dark','Sec-Ch-Ua':"",'Sec-Ch-Ua-Full-Version-List':"",'Sec-Ch-Ua-Mobile':'?0','Sec-Ch-Ua-Model':"",'Sec-Ch-Ua-Platform':"",'Sec-Ch-Ua-Platform-Version':"",'Sec-Fetch-Dest':'empty','Sec-Fetch-Mode':'cors','Sec-Fetch-Site':'same-origin','User-Agent':i}
-
-#--> Login
-class Login():
-
-    #--> Initialization
-    def __init__(self):
-        self.r = requests.Session()
-        self.CekCookies()
-        Menu()
+#--> PostReactions Method
+def PostReactions(self, post_url, result):
+    # Get cookies from input
+    self.cookie = input_cookies()
     
-    #--> Check Cookies
-    def CekCookies(self):
-        try:
-            self.cookie = open('login/cookie.json','r').read()
-            req = self.r.get('https://www.facebook.com/profile.php', headers=HeadersGet(), cookies={'cookie':self.cookie}, allow_redirects=True).text
-            id, name = list(re.findall('"USER_ID":"(.*?)","NAME":"(.*?)"',str(req))[0])
-            if id == '0': self.InputCokies(); id, name = list(re.findall('"USER_ID":"(.*?)","NAME":"(.*?)"',str(req))[0])
-            clear()
-            print('Login Sebagai %s\n'%(name))
-        except Exception as e: self.InputCokies()
+    r = requests.Session()
+    req = r.get(post_url, headers=HeadersGet(), cookies={'cookie': self.cookie}, allow_redirects=True).content
     
-    #--> Save Cookies
-    def InputCokies(self):
-        print('Cookie Invalid!')
-        time.sleep(2)
-        clear()
-        cok = input('Input Cookies : ')
-        open('login/cookie.json','w').write(cok)
-        self.CekCookies()
-
-#--> Logout
-def Logout():
-    c = input('Yakin Ingin Logout ? [y/t] : ').lower()
-    if c=='y':
-        try: shutil.rmtree('login'); print('Berhasil Logout\n')
-        except Exception as e: print('Gagal Logout\n')
-    else: print('Batal Logout\n')
-
-#--> Menu
-class Menu():
-
-    #--> Initialization
-    def __init__(self):
-        self.result = []
-        print('[ Dump Menu ]')
-        print('[5] Post Reactions')  # Add this option
-        print('[0] Logout')
-        x = input('Pilih : ')
-        print('')
-        if   x in ['0','00','000','z']: Logout()
-        elif x in ['5','05','005','e']: self.MenuPostReactions()  # Add this option
-        else: print('Isi Yang Benar!'); exit()
-        print('\rBerhasil Dump %s ID'%(str(len(self.result))))
-
-    #--> Menu Post Reactions
-    def MenuPostReactions(self):
-        DP = Dump()
-        post_url = input('Masukkan URL Postingan : ')
-        print('')
-        print('Tekan ctrl+c Untuk Berhenti')
-        DP.PostReactions(post_url, self.result)
-
-#--> Convert ID To URL
-def ConvertURL(i):
-    if 'http' in str(i):
-        if 'www.facebook.com' in str(i): url = i
-        elif 'm.facebook.com' in str(i): url = i.replace('m.facebook.com','www.facebook.com')
-        elif 'mbasic.facebook.com' in str(i): url = i.replace('mbasic.facebook.com','www.facebook.com')
-    else:
-        if 'www.facebook.com' in str(i): url = 'https://' + i
-        elif 'm.facebook.com' in str(i): url = 'https://' + i.replace('m.facebook.com','www.facebook.com')
-        elif 'mbasic.facebook.com' in str(i): url = 'https://' + i.replace('mbasic.facebook.com','www.facebook.com')
-        else:
-            if 'facebook.com' in str(i): url = 'https://www.facebook.com' + i.replace('facebook.com','').replace('Facebook.com','')
-            else: url = 'https://www.facebook.com/%s'%(i)
-    return(url)
-
-#--> Get Data Payload
-def GetData(req):
-    try:
-        act = re.search('"actorID":"(.*?)"',str(req)).group(1)
-        hst = re.search('"haste_session":"(.*?)",',str(req)).group(1)
-        rev = re.search('{"rev":(.*?)}',str(req)).group(1)
-        hsi = re.search('"hsi":"(.*?)",',str(req)).group(1)
-        dts = re.search('"DTSGInitialData",\[\],{"token":"(.*?)"',str(req)).group(1)
-        jzt = re.search('&jazoest=(.*?)",',str(req)).group(1)
-        lsd = re.search('"LSD",\[\],{"token":"(.*?)"',str(req)).group(1)
-        spr = re.search('"__spin_r":(.*?),',str(req)).group(1)
-        spt = re.search('"__spin_t":(.*?),',str(req)).group(1)
-        dta = {'av':act, '__user':act, '__a':'1', '__hs':hst, 'dpr':'1.5', '__ccg':'EXCELLENT', '__rev':rev, '__hsi':hsi, '__comet_req':'15', 'fb_dtsg': dts, 'jazoest': jzt, 'lsd': lsd, '__spin_b':'trunk', '__spin_r':spr, '__spin_t':spt}
-        return(dta)
-    except Exception as e: return({None})
-
-#--> Dump Method
-class Dump():
-
-    #--> Initialization
-    def __init__(self):
-        self.loop = 1
-        self.cookie = open('login/cookie.json','r').read()
-
-    def PostReactions(self, post_url, result):
-        r = requests.Session()
-        req = r.get(post_url, headers=HeadersGet(), cookies={'cookie': self.cookie}, allow_redirects=True).content
-        post_id = re.search('"fb://(\d+)"', str(req)).group(1)
+    # Perform the regular expression search
+    post_id_match = re.search('"fb://(\d+)"', str(req))
+    
+    # Check if a match was found
+    if post_id_match:
+        # Access the group if a match was found
+        post_id = post_id_match.group(1)
+        
+        # Get post ID from input
+        # post_id = input_post_id()
         
         # Construct the GraphQL query to fetch post reactions
         query = '''
@@ -168,8 +55,5 @@ class Dump():
         
         print('\rSedang Dump %s ID' % str(len(result)), end='')
         sys.stdout.flush()
-
-#--> Trigger
-if __name__ == '__main__':
-    mod()
-    Login()
+    else:
+        print("No post ID found in the response.")
