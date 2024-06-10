@@ -2,7 +2,6 @@ import os
 import requests
 import re
 from bs4 import BeautifulSoup as parser
-from concurrent.futures import ThreadPoolExecutor
 
 class Login:
     def __init__(self):
@@ -54,6 +53,8 @@ class Dump:
             user_id = re.search(r'id=(\d+)', user['href'])
             if user_id:
                 uids.append(user_id.group(1))
+            if len(uids) >= 100:
+                break
         return uids
 
     def save_cookies(self, cookies):
